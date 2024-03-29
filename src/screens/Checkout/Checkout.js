@@ -44,6 +44,7 @@ export const Checkout = () => {
       dispatch(setLoader(true))
       setTimeout(()=>{
         setCartItems(items.data);
+        dispatch(setLoader(false))
       },2000)
     }, [items]);
   

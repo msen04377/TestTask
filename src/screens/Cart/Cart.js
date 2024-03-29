@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Header, CheckoutLayout } from '../../components';
+import { Header, CheckoutLayout, Loader } from '../../components';
 import { useNavigation } from '@react-navigation/native';
 import {
   addItemToCart,
@@ -33,6 +33,7 @@ export const Cart = () => {
     dispatch(setLoader(true))
     setTimeout(()=>{
       setCartItems(items.data);
+      dispatch(setLoader(false))
     },2000)
   }, [items]);
 
