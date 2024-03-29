@@ -6,6 +6,7 @@ import CartReducer from './slices/CartSlice';
 import AddressReducer from './slices/AddressSlice';
 import OrderReducer from './slices/OrderSlice';
 import LoginSlice from './slices/LoginSlice';
+import LoaderSlice from './slices/LoaderSlice';
 export const store = configureStore({
   reducer: {
     product: ProductReduer,
@@ -13,6 +14,6 @@ export const store = configureStore({
     cart: CartReducer,
     address: AddressReducer,
     order: OrderReducer,
-    LoginSlice: LoginSlice
+    Loader:LoaderSlice
   },
 });

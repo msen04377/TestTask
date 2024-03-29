@@ -10,9 +10,7 @@ import {
     Alert
   } from 'react-native';
   import React, {useEffect, useState} from 'react';
-  // import RazorpayCheckout from 'react-native-razorpay';
   import {
-    CommonActions,
     useIsFocused,
     useNavigation,
   } from '@react-navigation/native';
@@ -23,13 +21,17 @@ import {
     reduceItemFromCart,
     removeItemFromCart,
   } from '../../redux/slices/CartSlice';
-  import {CustomButton,Header} from '../../components';
+  import {CustomButton,Header, Loader} from '../../components';
   import AsyncStorage from '@react-native-async-storage/async-storage';
   import {orderItem} from '../../redux/slices/OrderSlice';
+import { setLoader } from '../../redux/slices/LoaderSlice';
   
 export const Checkout = () => {
     const navigation = useNavigation();
+
     const items = useSelector(state => state.cart);
+    const loading = useSelector((state)=>state?.Loader.loading)
+
     const [cartItems, setCartItems] = useState([]);
     const [selectedMethod, setSelectedMethod] = useState(0);
     const isFocused = useIsFocused();
@@ -37,8 +39,12 @@ export const Checkout = () => {
       'Please Select Address',
     );
     const dispatch = useDispatch();
+
     useEffect(() => {
-      setCartItems(items.data);
+      dispatch(setLoader(true))
+      setTimeout(()=>{
+        setCartItems(items.data);
+      },2000)
     }, [items]);
   
     const getTotal = () => {
@@ -50,9 +56,11 @@ export const Checkout = () => {
       });
       return total.toFixed(0);
     };
+
     useEffect(() => {
       getSelectedAddress();
     }, [isFocused]);
+
     const getSelectedAddress = async () => {
       setSelectedAddress(await AsyncStorage.getItem('MY_ADDRESS'));
     };
@@ -93,21 +101,6 @@ export const Checkout = () => {
       navigation.navigate('OrderSuccess');
     };
     const payNow = () => {
-      var options = {
-        description: 'Credits towards consultation',
-        image: 'https://i.imgur.com/3g7nmJC.png',
-        currency: 'INR',
-        key: 'rzp_test_NRa1R5eCizAnFY', // Your api key
-        amount: '5000',
-        name: 'foo',
-        prefill: {
-          email: 'void@razorpay.com',
-          contact: '9191919191',
-          name: 'Razorpay Software'
-        },
-        theme: {color: '#F37254'}
-      }
-      // alert("Order Succefful")
       Alert.alert('Order Succefful', 'Your order has been created', [
         {
           text: 'Cancel',
@@ -119,187 +112,178 @@ export const Checkout = () => {
           navigation.navigate('ProductList')
         }},
       ]);
-      // console.log("RazorpayCheckout", RazorpayCheckout)
-      // RazorpayCheckout.open(options).then((data) => {
-      //   // handle success
-      //   alert(`Success: ${data.razorpay_payment_id}`);
-      // }).catch((error) => {
-      //   // handle failure
-      //   console.log("error", error)
-      //   alert(`Error: ${error.code} | ${error.description}`);
-      // });
     };
     return (
-      <View style={styles.container}>
-        <Header
-          leftIcon={require('../../images/back.png')}
-          title={'Checkout'}
-          onClickLeftIcon={() => {
-            navigation.goBack();
-          }}
-        />
-        <ScrollView>
-          <Text style={styles.title}>Added Items</Text>
-          <View>
-            <FlatList
-              data={cartItems}
-              renderItem={({item, index}) => {
-                return (
-                  <TouchableOpacity
-                    activeOpacity={1}
-                    style={styles.productItem}
-                    onPress={() => {
-                      navigation.navigate('ProductDetail', {data: item});
-                    }}>
-                    <Image source={{uri: item.image}} style={styles.itemImage} />
-                    <View>
-                      <Text style={styles.name}>
-                        {item.title.length > 25
-                          ? item.title.substring(0, 25) + '...'
-                          : item.title}
-                      </Text>
-                      <Text style={styles.desc}>
-                        {item.description.length > 30
-                          ? item.description.substring(0, 30) + '...'
-                          : item.description}
-                      </Text>
-                      <View style={styles.qtyview}>
-                        <Text style={styles.price}>{'$' + item.price}</Text>
-                        <TouchableOpacity
-                          style={styles.btn}
-                          onPress={() => {
-                            if (item.qty > 1) {
-                              dispatch(reduceItemFromCart(item));
-                            } else {
-                              dispatch(removeItemFromCart(index));
-                            }
-                          }}>
-                          <Text style={{fontSize: 18, fontWeight: '600'}}>-</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.qty}>{item.qty}</Text>
-                        <TouchableOpacity
-                          style={styles.btn}
-                          onPress={() => {
-                            dispatch(addItemToCart(item));
-                          }}>
-                          <Text style={{fontSize: 18, fontWeight: '600'}}>+</Text>
-                        </TouchableOpacity>
+      <React.Fragment>
+        <View style={styles.container}>
+          <Header
+            leftIcon={require('../../images/back.png')}
+            title={'Checkout'}
+            onClickLeftIcon={() => {
+              navigation.goBack();
+            }}
+          />
+          <ScrollView>
+            <Text style={styles.title}>Added Items</Text>
+            <View>
+              <FlatList
+                data={cartItems}
+                renderItem={({item, index}) => {
+                  return (
+                    <TouchableOpacity
+                      activeOpacity={1}
+                      style={styles.productItem}>
+                      <Image source={{uri: item.image}} style={styles.itemImage} />
+                      <View>
+                        <Text style={styles.name}>
+                          {item.title.length > 25
+                            ? item.title.substring(0, 25) + '...'
+                            : item.title}
+                        </Text>
+                        <Text style={styles.desc}>
+                          {item.description.length > 30
+                            ? item.description.substring(0, 30) + '...'
+                            : item.description}
+                        </Text>
+                        <View style={styles.qtyview}>
+                          <Text style={styles.price}>{'$' + item.price}</Text>
+                          <TouchableOpacity
+                            style={styles.btn}
+                            onPress={() => {
+                              if (item.qty > 1) {
+                                dispatch(reduceItemFromCart(item));
+                              } else {
+                                dispatch(removeItemFromCart(index));
+                              }
+                            }}>
+                            <Text style={{fontSize: 18, fontWeight: '600'}}>-</Text>
+                          </TouchableOpacity>
+                          <Text style={styles.qty}>{item.qty}</Text>
+                          <TouchableOpacity
+                            style={styles.btn}
+                            onPress={() => {
+                              dispatch(addItemToCart(item));
+                            }}>
+                            <Text style={{fontSize: 18, fontWeight: '600'}}>+</Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              }}
-            />
-          </View>
-          <View style={styles.totalView}>
-            <Text style={styles.title}>Total</Text>
-            <Text style={[styles.title, {marginRight: 20}]}>
-              {'KWD' + getTotal() + '.000'}
-            </Text>
-          </View>
-          <Text style={styles.title}>Select Payment Mode</Text>
-          <TouchableOpacity
-            style={styles.paymentMethods}
-            onPress={() => {
-              setSelectedMethod(0);
-            }}>
-            <Image
-              source={
-                selectedMethod == 0
-                  ? require('../../images/radio_2.png')
-                  : require('../../images/radio_1.png')
-              }
-              style={[
-                styles.img,
-                {tintColor: selectedMethod == 0 ? 'orange' : 'black'},
-              ]}
-            />
-            <Text style={styles.paymentMethdodsTxt}>Credit Card</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.paymentMethods}
-            onPress={() => {
-              setSelectedMethod(1);
-            }}>
-            <Image
-              source={
-                selectedMethod == 1
-                  ? require('../../images/radio_2.png')
-                  : require('../../images/radio_1.png')
-              }
-              style={[
-                styles.img,
-                {tintColor: selectedMethod == 1 ? 'orange' : 'black'},
-              ]}
-            />
-            <Text style={styles.paymentMethdodsTxt}>Debit Card</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.paymentMethods}
-            onPress={() => {
-              setSelectedMethod(2);
-            }}>
-            <Image
-              source={
-                selectedMethod == 2
-                  ? require('../../images/radio_2.png')
-                  : require('../../images/radio_1.png')
-              }
-              style={[
-                styles.img,
-                {tintColor: selectedMethod == 2 ? 'orange' : 'black'},
-              ]}
-            />
-            <Text style={styles.paymentMethdodsTxt}>UPI</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.paymentMethods}
-            onPress={() => {
-              setSelectedMethod(3);
-            }}>
-            <Image
-              source={
-                selectedMethod == 3
-                  ? require('../../images/radio_2.png')
-                  : require('../../images/radio_1.png')
-              }
-              style={[
-                styles.img,
-                {tintColor: selectedMethod == 3 ? 'orange' : 'black'},
-              ]}
-            />
-            <Text style={styles.paymentMethdodsTxt}>Cash on Delivery</Text>
-          </TouchableOpacity>
-          <View style={styles.addressView}>
-            <Text style={styles.title}>Address</Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            </View>
+            <View style={styles.totalView}>
+              <Text style={styles.title}>Total</Text>
+              <Text style={[styles.title, {marginRight: 20}]}>
+                {'KWD' + getTotal() + '.000'}
+              </Text>
+            </View>
+            <Text style={styles.title}>Select Payment Mode</Text>
+            <TouchableOpacity
+              style={styles.paymentMethods}
+              onPress={() => {
+                setSelectedMethod(0);
+              }}>
+              <Image
+                source={
+                  selectedMethod == 0
+                    ? require('../../images/radio_2.png')
+                    : require('../../images/radio_1.png')
+                }
+                style={[
+                  styles.img,
+                  {tintColor: selectedMethod == 0 ? 'orange' : 'black'},
+                ]}
+              />
+              <Text style={styles.paymentMethdodsTxt}>Credit Card</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.paymentMethods}
+              onPress={() => {
+                setSelectedMethod(1);
+              }}>
+              <Image
+                source={
+                  selectedMethod == 1
+                    ? require('../../images/radio_2.png')
+                    : require('../../images/radio_1.png')
+                }
+                style={[
+                  styles.img,
+                  {tintColor: selectedMethod == 1 ? 'orange' : 'black'},
+                ]}
+              />
+              <Text style={styles.paymentMethdodsTxt}>Debit Card</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.paymentMethods}
+              onPress={() => {
+                setSelectedMethod(2);
+              }}>
+              <Image
+                source={
+                  selectedMethod == 2
+                    ? require('../../images/radio_2.png')
+                    : require('../../images/radio_1.png')
+                }
+                style={[
+                  styles.img,
+                  {tintColor: selectedMethod == 2 ? 'orange' : 'black'},
+                ]}
+              />
+              <Text style={styles.paymentMethdodsTxt}>UPI</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.paymentMethods}
+              onPress={() => {
+                setSelectedMethod(3);
+              }}>
+              <Image
+                source={
+                  selectedMethod == 3
+                    ? require('../../images/radio_2.png')
+                    : require('../../images/radio_1.png')
+                }
+                style={[
+                  styles.img,
+                  {tintColor: selectedMethod == 3 ? 'orange' : 'black'},
+                ]}
+              />
+              <Text style={styles.paymentMethdodsTxt}>Cash on Delivery</Text>
+            </TouchableOpacity>
+            <View style={styles.addressView}>
+              <Text style={styles.title}>Address</Text>
+              <Text
+                style={[
+                  styles.title,
+                  {textDecorationLine: 'underline', color: '#0269A0FB'},
+                ]}
+                onPress={() => {
+                  navigation.navigate('Addresses');
+                }}>
+                Edit Address
+              </Text>
+            </View>
             <Text
               style={[
                 styles.title,
-                {textDecorationLine: 'underline', color: '#0269A0FB'},
-              ]}
-              onPress={() => {
-                navigation.navigate('Addresses');
-              }}>
-              Edit Address
+                {marginTop: 10, fontSize: 16, color: '#636363'},
+              ]}>
+              {selectedAddress}
             </Text>
-          </View>
-          <Text
-            style={[
-              styles.title,
-              {marginTop: 10, fontSize: 16, color: '#636363'},
-            ]}>
-            {selectedAddress}
-          </Text>
-          <CustomButton
-            bg={'green'}
-            title={'Pay & Order'}
-            color={'#fff'}
-            onClick={() => {
-              payNow();
-            }}
-          />
-        </ScrollView>
-      </View>
+            <CustomButton
+              bg={'green'}
+              title={'Pay & Order'}
+              color={'#fff'}
+              onClick={() => {
+                payNow();
+              }}
+            />
+          </ScrollView>
+        </View>
+        <Loader loading={loading} />
+      </React.Fragment>
     );
   };
   

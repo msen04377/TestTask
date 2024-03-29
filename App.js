@@ -4,23 +4,19 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
-  Button
 } from "react-native";
-import * as WebBrowser from "expo-web-browser";
 import { Provider } from "react-redux";
-import { AppNavigator } from "../SCS_Test/src/navigation";
-import { store } from "../SCS_Test/src/redux/store";
 
-WebBrowser.maybeCompleteAuthSession();
+import {AppNavigator} from './src/navigation'
+import {store} from './src/redux/store'
 
 export default function App() {
-  const [userInfo, setUserInfo] = React.useState(null);
 
   return (
     <Provider store={store}>
-      <StatusBar backgroundColor='#6bb120'  />
+      <StatusBar backgroundColor='#FF5733'  />
       <SafeAreaView style={styles.droidSafeArea}>
-      <AppNavigator />
+        <AppNavigator />
       </SafeAreaView>
      </Provider>
   );

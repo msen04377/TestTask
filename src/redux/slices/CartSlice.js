@@ -7,24 +7,22 @@ const CartSlice = createSlice({
   },
   reducers: {
     addItemToCart(state, action) {
-      console.log("state ::::::", state,  "payload",action.payload)
       let tempData = state.data;
       let isItemExist = false;
       tempData?.map(item => {
         if (item.id == action?.payload?.id) {
           isItemExist = true;
-          item.qty = item.qty + 1;
+          item.qty = action?.payload?.qty;
         }
       });
       if (!isItemExist) {
-        console.log("payload push",action.payload.length)
         if(action.payload.length === 0){
           tempData = []
         }else{
           tempData?.push(action.payload);
         }
+        // tempData?.push(action.payload);
       }
-      console.log("tempData@@@@@@", tempData)
       state.data = tempData;
     },
     reduceItemFromCart(state, action) {

@@ -14,7 +14,7 @@ export const CheckoutLayout = ({total, items}) => {
     <View style={styles.container}>
       <View style={styles.tab}>
         <Text>{`(items ${items} )`}</Text>
-        <Text style={styles.total}>{'Total: KWD' + total + '.000'}</Text>
+        <Text style={styles.total}>{'Total: $' + " " + total + '.000'}</Text>
       </View>
       <View style={styles.tab}>
         <TouchableOpacity
