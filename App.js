@@ -1,20 +1,34 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { StatusBar } from "expo-status-bar";
+import {
+  StyleSheet,
+  SafeAreaView,
+  Platform,
+  Button
+} from "react-native";
+import * as WebBrowser from "expo-web-browser";
+import { Provider } from "react-redux";
+import { AppNavigator } from "../SCS_Test/src/navigation";
+import { store } from "../SCS_Test/src/redux/store";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function App() {
+  const [userInfo, setUserInfo] = React.useState(null);
+
   return (
-    <View style={styles.container}>
-      <Text>GraffersId!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={store}>
+      <StatusBar backgroundColor='#6bb120'  />
+      <SafeAreaView style={styles.droidSafeArea}>
+      <AppNavigator />
+      </SafeAreaView>
+     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  droidSafeArea: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: Platform.OS === "android" ? 25 : 0,
   },
 });
